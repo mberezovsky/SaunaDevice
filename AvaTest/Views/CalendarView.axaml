@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:AvaTest.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvaTest.Views.CalendarView">
+    <Design.DataContext>
+        <viewModels:CalendarViewModel/>
+    </Design.DataContext>
+    <Grid RowDefinitions="5*, *, *" HorizontalAlignment="Center">
+        <Grid.Styles>
+            <Style Selector="TextBlock">
+                <Setter Property="Margin" Value="5"/>
+                <!-- <Setter Property="FontFamily" Value="avares://AvaTest/Assets/Fonts/FanfareTicker3D.ttf"/> -->
+            </Style>
+        </Grid.Styles>
+        <Viewbox Grid.Row="0">
+            <Grid ColumnDefinitions="*,Auto,*" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Hour, StringFormat={}{0:D2}}" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text=":"/>
+                <TextBlock Grid.Column="2" Text="{Binding Minute, StringFormat={}{0:D2}}" HorizontalAlignment="Center"/>
+            </Grid>
+        </Viewbox>
+        <Viewbox Grid.Row="1">
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Day, StringFormat={}{0:D2}}"/>
+                <TextBlock Grid.Column="1" Text="."/>
+                <TextBlock Grid.Column="2" Text="{Binding Month, StringFormat={}{0:D2}}"/>
+                <TextBlock Grid.Column="3" Text="."/>
+                <TextBlock Grid.Column="4" Text="{Binding Year, StringFormat={}{0:D4}}"/>
+            </Grid>
+        </Viewbox>
+        <Grid Grid.Row="2" HorizontalAlignment="Center">
+            <Viewbox><TextBlock Text="{Binding DayOfWeekString}"/></Viewbox>
+        </Grid>
+    </Grid>
+</UserControl>
