@@ -12,14 +12,6 @@
 
     <Grid ColumnDefinitions="3*,*">
         <oxy:Plot Grid.Column="0" Title="Температура в парилке" Name="Plotter">
-            <!-- <oxy:Plot.Axes> -->
-            <!--     <oxy:DateTimeAxis Position="Bottom" FirstDateTime="{Binding MinTime}" LastDateTime="{Binding MaxTime}"/> -->
-            <!--     <oxy:LinearColorAxis Position="Right"/> -->
-            <!-- </oxy:Plot.Axes> -->
-            <!-- <avalonia:Plot.Axes> -->
-            <!--     <avalonia:CategoryAxis Position="Left" Items="{Binding Items}" LabelField="Label"/> -->
-            <!--     <avalonia:LinearAxis Position="Bottom" MinimumPadding="0" AbsoluteMinimum="0"/> -->
-            <!-- </avalonia:Plot.Axes> -->
             <oxy:Plot.Series>
                 <oxy:LineSeries Title="Температура" Items="{Binding Measures}"
                                 DataFieldX="DeltaTime" DataFieldY="Data" StrokeThickness="2" Color="Blue"/>
@@ -43,9 +35,14 @@
                 <TextBlock Text="℃"/>
             </StackPanel>
             <Grid Grid.Row="1" RowDefinitions="*,*,*">
-                <Svg Path="/Assets/up_arrow_icon.svg" />
-                <Svg Grid.Row="1" Path="/Assets/updown_arrow_icon.svg"/>
-                <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg"/>
+                <Grid Opacity="0.1">
+                    <Svg Path="/Assets/up_arrow_icon.svg"/>
+                </Grid>
+                <Svg Grid.Row="1" Path="/Assets/updown_arrow_icon.svg" Opacity="0.1"/>
+                <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg" Opacity="0.1"/>
+                <!-- <Svg Path="/Assets/up_arrow_icon.svg" IsVisible="{Binding IsTemperatureRising}"/> -->
+                <!-- <Svg Grid.Row="1" Path="/Assets/updown_arrow_icon.svg" IsVisible="{Binding IsTemperatureKeeping}"/> -->
+                <!-- <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg" IsVisible="{Binding IsTemperatureCooling}"/> -->
             </Grid>
             <!-- <TextBox Grid.Row="1" Text="{Binding FigurePath}" -->
             <!--          AcceptsReturn="True" TextWrapping="Wrap"/> -->

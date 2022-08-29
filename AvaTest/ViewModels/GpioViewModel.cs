@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using Avalonia.Threading;
+using AvaTest.Services;
 using ReactiveUI;
 using Unosquare.RaspberryIO;
 using Unosquare.RaspberryIO.Abstractions;
@@ -13,6 +14,7 @@ namespace AvaTest.ViewModels
 
     public class GpioViewModel : ViewModelBase
     {
+        private readonly Dht11Service m_dht11Service = new Dht11Service();
         private enum TemperatureMode
         {
             Raw,
@@ -20,7 +22,7 @@ namespace AvaTest.ViewModels
             Fahrenheit
         }
 
-        private readonly bool m_isFakeTemperature = false;
+        private readonly bool m_isFakeTemperature;
 
         public GpioViewModel()
         {
@@ -29,15 +31,6 @@ namespace AvaTest.ViewModels
 
             MeasureStepsCount = 100;
 
-            // Items = new ObservableCollection<Item>()
-            // {
-            //     new Item {Label = "Apples", Value1 = 37, Value2 = 12, Value3 = 19, Value4 = 42},
-            //     new Item { Label = "Pears", Value1 = 7, Value2 = 21, Value3 = 9, Value4 = 21},
-            //     new Item { Label = "Bananas", Value1 = 23, Value2 = 2, Value3 = 29, Value4 = 10}
-            //
-            // };
-
-            // FigurePath = "M 0,0 c 0,0 50,0 50,-50 c 0,0 50,0 50,50 h -50 v 50 l -50,-50 Z";
             if (!m_isFakeTemperature)
             {
                 Pi.Init<BootstrapWiringPi>();
@@ -98,7 +91,14 @@ namespace AvaTest.ViewModels
             if (m_isFakeTemperature)
                 temp = 25.0f + m_rnd.Next(-5, 5);
             else
+            {
                 temp = ReadTemp();
+                if (m_dht11Service.ReadData())
+                {
+                    InternalTemperature = (int) m_dht11Service.Temperature;
+                    Humidity = (int) m_dht11Service.Humidity;
+                }
+            }
 
             TemperatureInCelsius = temp;
             ShiftTemps(temp);
@@ -116,8 +116,30 @@ namespace AvaTest.ViewModels
             }
 
             m_temperatureMeasures.Last().Data = temp;
-            // m_temperatureMeasures.RemoveAt(0);
-            // m_temperatureMeasures.Add(new MeasureData() {Data = temp, Time = DateTime.Now});
+            var tempState = AnalyzeDelta(m_temperatureMeasures);
+            TemperatureState = tempState;
+        }
+
+        private ETemperatureStates AnalyzeDelta(ObservableCollection<MeasureData> temperatureMeasures)
+        {
+            var increasingDeltas = 0;
+            var decreasingDeltas = 0;
+
+            for (int i = temperatureMeasures.Count - MedianAperture; i < temperatureMeasures.Count; i++)
+            {
+                var delta = temperatureMeasures[i].Data - temperatureMeasures[i - 1].Data; 
+                if (delta > 0f) // Rising
+                    increasingDeltas++;
+                else if (delta < 0f)
+                    decreasingDeltas++;
+            }
+
+            if (increasingDeltas <= 1)
+                if (decreasingDeltas <= 1)
+                    return ETemperatureStates.Holding;
+                else
+                    return ETemperatureStates.Cooling;
+            return decreasingDeltas <= 1 ? ETemperatureStates.Heating : ETemperatureStates.Holding;
         }
 
         private int m_mySck;
@@ -226,6 +248,12 @@ namespace AvaTest.ViewModels
         //     set => this.RaiseAndSetIfChanged(ref m_figureGeometry, value);
         // }
 
+        public int MedianAperture
+        {
+            get => m_medianAperture;
+            set => this.RaiseAndSetIfChanged(ref m_medianAperture, value);
+        }
+
         public int MeasureStepsCount
         {
             get => m_temperatureStepsCount;
@@ -255,7 +283,6 @@ namespace AvaTest.ViewModels
                     currentDt += TimeSpan.FromSeconds(1);
                 }
                 this.RaiseAndSetIfChanged(ref m_temperatureStepsCount, value);
-
             }
         }
 
@@ -273,6 +300,61 @@ namespace AvaTest.ViewModels
 
         public ObservableCollection<MeasureData> Measures => m_temperatureMeasures;
 
+        public enum ETemperatureStates
+        {
+            Heating,
+            Holding,
+            Cooling
+        }
+
+        private ETemperatureStates m_temperatureState;
+        private bool m_isTemperatureRising;
+        private bool m_isTemperatureCooling;
+        private bool m_isTemperatureKeeping;
+        private int m_internalTemperature;
+        private int m_humidity;
+        private int m_medianAperture = 5;
+
+        public ETemperatureStates TemperatureState
+        {
+            get => m_temperatureState;
+            set
+            {
+                IsTemperatureCooling = value == ETemperatureStates.Cooling;
+                IsTemperatureRising = value == ETemperatureStates.Heating;
+                IsTemperatureKeeping = value == ETemperatureStates.Holding;
+            }
+        }
+
+        public bool IsTemperatureRising
+        {
+            get => m_isTemperatureRising;
+            set => this.RaiseAndSetIfChanged(ref m_isTemperatureRising,  value);
+        }
+
+        public bool IsTemperatureCooling
+        {
+            get => m_isTemperatureCooling;
+            set => this.RaiseAndSetIfChanged(ref m_isTemperatureCooling, value);
+        }
+
+        public bool IsTemperatureKeeping
+        {
+            get => m_isTemperatureKeeping;
+            set => this.RaiseAndSetIfChanged(ref m_isTemperatureKeeping, value);
+        }
+
+        public int InternalTemperature
+        {
+            get => m_internalTemperature;
+            set => this.RaiseAndSetIfChanged(ref m_internalTemperature, value);
+        }
+
+        public int Humidity
+        {
+            get => m_humidity;
+            set => this.RaiseAndSetIfChanged(ref m_humidity, value);
+        }
     }
 
     public class MeasureData
