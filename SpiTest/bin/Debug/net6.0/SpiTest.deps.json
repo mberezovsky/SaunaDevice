@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "SpiTest/1.0.0": {
+        "dependencies": {
+          "Unosquare.Raspberry.Abstractions": "0.4.1"
+        },
+        "runtime": {
+          "SpiTest.dll": {}
+        }
+      },
+      "Unosquare.Raspberry.Abstractions/0.4.1": {
+        "runtime": {
+          "lib/netstandard2.0/Unosquare.Raspberry.Abstractions.dll": {
+            "assemblyVersion": "0.4.1.0",
+            "fileVersion": "0.4.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SpiTest/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Unosquare.Raspberry.Abstractions/0.4.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/Yu7KjCx2tB2u0Lzs6i9vtQ6iK5KQ23V5kqnqWlWLHeV1Rt8jKZJPGTOTAd15wcrBceRoldexlrdmYPU2QSxxQ==",
+      "path": "unosquare.raspberry.abstractions/0.4.1",
+      "hashPath": "unosquare.raspberry.abstractions.0.4.1.nupkg.sha512"
+    }
+  }
+}

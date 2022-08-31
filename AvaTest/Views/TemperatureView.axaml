@@ -22,28 +22,72 @@
         <!--           Data="{Binding  FigureGeometry}" -->
         <!--     /> -->
         <!-- </Canvas> -->
-        <Grid Grid.Column="1" RowDefinitions="Auto, *">
+        <Grid Grid.Column="1" RowDefinitions="Auto, *, *, Auto">
             <Grid.Styles>
                 <Style Selector="TextBlock">
                     <!-- <Setter Property="FontSize" Value="32"/> -->
                     <Setter Property="Margin" Value="5"/>
+                    <Setter Property="VerticalAlignment" Value="Center"></Setter>
                 </Style>
             </Grid.Styles>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Сейчас: "/>
-                <TextBlock Text="{Binding TemperatureInCelsius}" />
-                <TextBlock Text="℃"/>
-            </StackPanel>
-            <Grid Grid.Row="1" RowDefinitions="*,*,*">
-                <Grid Opacity="0.1">
-                    <Svg Path="/Assets/up_arrow_icon.svg"/>
+            <TextBlock Text="Сейчас:"/>
+            
+            <Grid Grid.Row="1" RowDefinitions="*,*,*" ColumnDefinitions="Auto, *, Auto">
+                <Grid.Styles>
+                    <Style Selector="TextBlock.leftAligned" >
+                        <Setter Property="TextAlignment" Value="Left"></Setter>
+                        <Setter Property="FontSize" Value="40"/>
+                    </Style>
+                    <Style Selector="TextBlock.Bolded">
+                        <Setter Property="FontWeight" Value="Bold"/>
+                    </Style>
+                    
+                </Grid.Styles>
+                <TextBlock Text="Парилка"/>
+                <Viewbox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding TemperatureInCelsius}" Classes="leftAligned Bolded"/>
+                        <TextBlock Text="℃" Classes="leftAligned"/>
+                    </StackPanel>
+                </Viewbox>
+                
+                <Grid Grid.Column="3" RowDefinitions="*,*,*" Opacity="0.1" VerticalAlignment="Center" Margin="5">
+                    <Grid.Styles>
+                        <Style Selector="Svg">
+                            <Setter Property="Width" Value="24"/>
+                            <Setter Property="Height" Value="24"/>
+                        </Style>
+                    </Grid.Styles>
+                    <Svg Grid.Row="2" Path="/Assets/up_arrow_icon.svg" IsVisible="{Binding IsTemperatureRising}"/>
+                    <Svg Grid.Row="2" Path="/Assets/updown_arrow_icon.svg" IsVisible="{Binding IsTemperatureKeeping}"/>
+                    <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg" IsVisible="{Binding IsTemperatureCooling}"/>
                 </Grid>
-                <Svg Grid.Row="1" Path="/Assets/updown_arrow_icon.svg" Opacity="0.1"/>
-                <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg" Opacity="0.1"/>
-                <!-- <Svg Path="/Assets/up_arrow_icon.svg" IsVisible="{Binding IsTemperatureRising}"/> -->
-                <!-- <Svg Grid.Row="1" Path="/Assets/updown_arrow_icon.svg" IsVisible="{Binding IsTemperatureKeeping}"/> -->
-                <!-- <Svg Grid.Row="2" Path="/Assets/down_arrow_icon.svg" IsVisible="{Binding IsTemperatureCooling}"/> -->
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Отдых:"/>
+                <Viewbox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Grid.ColumnSpan="2">
+                    <StackPanel  Orientation="Horizontal">
+                        <TextBlock Text="{Binding InternalTemperature}"  Classes="leftAligned Bolded"/>
+                        <TextBlock Text="℃" Classes="leftAligned"/>
+                    </StackPanel>
+                </Viewbox>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Влажность:"/>
+                <Viewbox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Grid.ColumnSpan="2">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Humidity}" Classes="leftAligned Bolded" />
+                        <TextBlock Text="мм рт ст" Classes="leftAligned"/>
+                    </StackPanel>
+                </Viewbox>
             </Grid>
+            <!-- <StackPanel Grid.Row="1" Orientation="Horizontal"> -->
+            <!--     <TextBlock Text="Парилка"/> -->
+            <!--     <TextBlock Text="{Binding TemperatureInCelsius}" /> -->
+            <!--     <TextBlock Text="℃"/> -->
+            <!-- </StackPanel> -->
+            <!-- <StackPanel Grid.Row="2" Orientation="Horizontal"> -->
+            <!--     <TextBlock Text="Отдых:"/> -->
+            <!--     <TextBlock Text="{Binding TemperatureInCelsius}" /> -->
+            <!--     <TextBlock Text="℃"/> -->
+            <!-- </StackPanel> -->
             <!-- <TextBox Grid.Row="1" Text="{Binding FigurePath}" -->
             <!--          AcceptsReturn="True" TextWrapping="Wrap"/> -->
             <!-- -->

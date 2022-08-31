@@ -14,12 +14,12 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,*,*,Auto" ColumnDefinitions="*,*">
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center"/>
-        <views:CalendarView Grid.Row="1" Grid.Column="1" DataContext="{Binding Calendar}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid RowDefinitions="Auto,*,*,Auto">
+        <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center"/> -->
+        <views:CalendarView Grid.Row="1" Grid.Column="0" DataContext="{Binding Calendar}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <views:TemperatureView Grid.Row="2" Grid.Column="0" DataContext="{Binding GpioViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                HorizontalContentAlignment="Stretch"/>
-        <Button Grid.Row="3" Grid.ColumnSpan="2" Command="{Binding IncreaseCounterCommand}" HorizontalAlignment="Center" Margin="5">Press it!</Button>
+        <!-- <Button Grid.Row="3" Grid.ColumnSpan="2" Command="{Binding IncreaseCounterCommand}" HorizontalAlignment="Center" Margin="5">Press it!</Button> -->
     </Grid>
 
 </Window>

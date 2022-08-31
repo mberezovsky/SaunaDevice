@@ -27,7 +27,7 @@ namespace AvaTest.ViewModels
         public GpioViewModel()
         {
             var os = Environment.OSVersion;
-            m_isFakeTemperature = os.Version.Major == 12;
+            m_isFakeTemperature = os.Version.Major == 21;
 
             MeasureStepsCount = 100;
 
@@ -87,16 +87,32 @@ namespace AvaTest.ViewModels
 
         private void TimerTick(object? sender, EventArgs e)
         {
+            Console.WriteLine("TimerTick");
             float temp;
             if (m_isFakeTemperature)
+            {
+                Console.WriteLine("Fake!");
                 temp = 25.0f + m_rnd.Next(-5, 5);
+            }
             else
             {
                 temp = ReadTemp();
-                if (m_dht11Service.ReadData())
+                Console.WriteLine("Temp: {0}", temp);
+                try
                 {
-                    InternalTemperature = (int) m_dht11Service.Temperature;
-                    Humidity = (int) m_dht11Service.Humidity;
+                    if (m_dht11Service.ReadData())
+                    {
+                        InternalTemperature = (int) m_dht11Service.Temperature;
+                        Humidity = (int) m_dht11Service.Humidity;
+                        Console.WriteLine("ITemp: {0}, Hum: {1}", InternalTemperature, Humidity);
+                    }
+                    else
+                        Console.WriteLine("Can't read Internal Temperature");
+
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
                 }
             }
 

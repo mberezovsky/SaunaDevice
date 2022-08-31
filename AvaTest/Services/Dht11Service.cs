@@ -21,18 +21,24 @@ namespace AvaTest.Services
 
         public bool ReadData()
         {
+            Console.WriteLine("ReadData - 0");
             Pi.Gpio[DataPin].PinMode = GpioPinDriveMode.Output;
-            SendAndSleep(GpioPinValue.High, 50);
+            SendAndSleep(GpioPinValue.High, 500);
             SendAndSleep(GpioPinValue.Low, 20);
             Pi.Gpio[DataPin].PinMode = GpioPinDriveMode.Input;
+            Pi.Gpio[DataPin].InputPullMode = GpioPinResistorPullMode.PullUp;
+            Console.WriteLine("ReadData - 1");
             var data = CollectInput();
+            Console.WriteLine("ReadData - 2");
             int[] pullUpLength = ParseDataPullUpLength(data);
+            Console.WriteLine("ReadData - 3");
             if (pullUpLength.Length != 40)
                 throw new ArgumentException($"Wrong pullup message length: {pullUpLength.Length}");
 
             byte[] bits = CalculateBits(pullUpLength);
             byte[] bytes = BitsToBytes(bits);
 
+            Console.WriteLine("ReadData - 4");
             int checksum = CalculateChecksum(bytes);
             if (checksum != bytes[4])
                 throw new ArgumentException("Wrong checksum");
@@ -160,20 +166,56 @@ namespace AvaTest.Services
             return length.ToArray();
         }
 
+        /*
+        def __collect_input(self):
+        # collect the data while unchanged found
+        unchanged_count = 0
+
+        # this is used to determine where is the end of the data
+        max_unchanged_count = 100
+
+        last = -1
+        data = []
+        while True:
+            current = RPi.GPIO.input(self.__pin)
+            data.append(current)
+            if last != current:
+                unchanged_count = 0
+                last = current
+            else:
+                unchanged_count += 1
+                if unchanged_count > max_unchanged_count:
+                    break
+
+        return data
+
+         */
         private byte[] CollectInput()
         {
             int unchangedCount = 0;
+            // int maxUnchangedCount = 100;
             int maxUnchangedCount = 100;
+            int DHT_MAXCOUNT = 32000;
 
             bool last = false;
             bool isFirst = true;
 
             var stream = new MemoryStream();
             byte[] buffer = new byte[1];
+
+            int initCount = 0;
+            while (Pi.Gpio[DataPin].Read() && initCount++ < DHT_MAXCOUNT)
+            { }
+
+            if (initCount >= DHT_MAXCOUNT)
+                throw new Exception("No pin initialization");
+            
             while (true)
             {
+                // Console.WriteLine("PIO Mode: {0} ({1})", Pi.Gpio[DataPin].PinMode, Pi.Gpio[DataPin].InputPullMode);
                 var val = Pi.Gpio[DataPin].Read();
 
+                Console.Write(val?"+":" ");
                 buffer[0] = val ? (byte) 0 : (byte) 1;
                 stream.Write(buffer, 0, 1);
                 if (isFirst || last != val)
@@ -187,6 +229,7 @@ namespace AvaTest.Services
                     if (unchangedCount > maxUnchangedCount)
                         break;
                 }
+                isFirst = false;
             }
 
             return stream.ToArray();
