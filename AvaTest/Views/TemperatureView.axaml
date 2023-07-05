@@ -11,7 +11,7 @@
     </Design.DataContext>
 
     <Grid ColumnDefinitions="3*,*">
-        <oxy:Plot Grid.Column="0" Title="Температура в парилке" Name="Plotter">
+        <oxy:Plot Grid.Column="0" Title="Температура в парилке" x:Name="Plotter">
             <oxy:Plot.Series>
                 <oxy:LineSeries Title="Температура" Items="{Binding Measures}"
                                 DataFieldX="DeltaTime" DataFieldY="Data" StrokeThickness="2" Color="Blue"/>
@@ -32,7 +32,7 @@
             </Grid.Styles>
             <TextBlock Text="Сейчас:"/>
             
-            <Grid Grid.Row="1" RowDefinitions="*,*,*" ColumnDefinitions="Auto, *, Auto">
+            <Grid Grid.Row="1" RowDefinitions="*,*,*" ColumnDefinitions="Auto, *, Auto, Auto">
                 <Grid.Styles>
                     <Style Selector="TextBlock.leftAligned" >
                         <Setter Property="TextAlignment" Value="Left"></Setter>

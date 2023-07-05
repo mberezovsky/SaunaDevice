@@ -1,13 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using Avalonia.Threading;
 using AvaTest.Services;
 using ReactiveUI;
-using Unosquare.RaspberryIO;
-using Unosquare.RaspberryIO.Abstractions;
-using Unosquare.WiringPi;
+// using Unosquare.RaspberryIO;
+// using Unosquare.RaspberryIO.Abstractions;
+// using Unosquare.WiringPi;
 
 namespace AvaTest.ViewModels
 {
@@ -31,11 +30,11 @@ namespace AvaTest.ViewModels
 
             MeasureStepsCount = 100;
 
-            if (!m_isFakeTemperature)
-            {
-                Pi.Init<BootstrapWiringPi>();
-                SetPins(11, 9, 8, TemperatureMode.Celsius);
-            }
+            // if (!m_isFakeTemperature)
+            // {
+            //     // Pi.Init<BootstrapWiringPi>();
+            //     // SetPins(11, 9, 8, TemperatureMode.Celsius);
+            // }
 
             MeasureStepsCount = 100;
             m_dispatcherTimer = new DispatcherTimer(TimeSpan.FromSeconds(3), DispatcherPriority.Normal, TimerTick);
@@ -85,7 +84,7 @@ namespace AvaTest.ViewModels
 
         private readonly Random m_rnd = new Random();
 
-        private void TimerTick(object? sender, EventArgs e)
+        private async void TimerTick(object? sender, EventArgs e)
         {
             Console.WriteLine("TimerTick");
             float temp;
@@ -96,14 +95,17 @@ namespace AvaTest.ViewModels
             }
             else
             {
-                temp = ReadTemp();
-                Console.WriteLine("Temp: {0}", temp);
+                // temp = ReadTemp();
+                // Console.WriteLine("Temp: {0}", temp);
                 try
                 {
-                    if (m_dht11Service.ReadData())
+                    if (!m_dht11Service.IsReady())
+                        return;
+                    if (await m_dht11Service.ReadDataAsync())
                     {
                         InternalTemperature = (int) m_dht11Service.Temperature;
                         Humidity = (int) m_dht11Service.Humidity;
+                        TemperatureInCelsius = (int) m_dht11Service.HotTemperature;
                         Console.WriteLine("ITemp: {0}, Hum: {1}", InternalTemperature, Humidity);
                     }
                     else
@@ -116,8 +118,8 @@ namespace AvaTest.ViewModels
                 }
             }
 
-            TemperatureInCelsius = temp;
-            ShiftTemps(temp);
+            // TemperatureInCelsius = temp;
+            ShiftTemps(TemperatureInCelsius);
             MinTime = m_temperatureMeasures.Min(item => item.Time);
             MaxTime = m_temperatureMeasures.Max(item => item.Time);
 
@@ -175,65 +177,18 @@ namespace AvaTest.ViewModels
         private DateTime m_maxTime;
         // private Collection<Item> m_items;
 
-        private void SetPins(int sck, int so, int cs, TemperatureMode mode)
-        {
-            m_mySck = sck;
-            m_mySo = so;
-            m_myCs = cs;
-            m_myMode = mode;
+        // private void SetPins(int sck, int so, int cs, TemperatureMode mode)
+        // {
+        //     m_mySck = sck;
+        //     m_mySo = so;
+        //     m_myCs = cs;
+        //     m_myMode = mode;
+        //
+        //     Pi.Gpio[m_mySck].PinMode = GpioPinDriveMode.Output;
+        //     Pi.Gpio[m_myCs].PinMode = GpioPinDriveMode.Output;
+        //     Pi.Gpio[m_mySo].PinMode = GpioPinDriveMode.Input;
+        // }
 
-            Pi.Gpio[m_mySck].PinMode = GpioPinDriveMode.Output;
-            Pi.Gpio[m_myCs].PinMode = GpioPinDriveMode.Output;
-            Pi.Gpio[m_mySo].PinMode = GpioPinDriveMode.Input;
-        }
-
-        private float ReadTemp()
-        {
-            Pi.Gpio[m_myCs].Write(GpioPinValue.Low);
-            Thread.Sleep(2);
-            Pi.Gpio[m_myCs].Write(GpioPinValue.High);
-            Thread.Sleep(220);
-
-            Pi.Gpio[m_myCs].Write(GpioPinValue.Low);
-            // Skipping the dummy 15-th bit...
-            Pi.Gpio[m_mySck].Write(GpioPinValue.High);
-            Thread.Sleep(1);
-            Pi.Gpio[m_mySck].Write(GpioPinValue.Low);
-
-            // Reading for 14 to 3 bits for info.
-            var value = 0;
-            for (int i = 11; i >= 0; i--)
-            {
-                Pi.Gpio[m_mySck].Write(GpioPinValue.High);
-                value += (Pi.Gpio[m_mySo].Read() ? 1 : 0) * (1 << i);
-                Pi.Gpio[m_mySck].Write(GpioPinValue.Low);
-            }
-
-            // Reading the 3 bit for error
-            Pi.Gpio[m_mySck].Write(GpioPinValue.High);
-            var errorTc = Pi.Gpio[m_mySo].Read();
-            Pi.Gpio[m_mySck].Write(GpioPinValue.Low);
-
-            for (int i = 1; i <= 2; i++)
-            {
-                Pi.Gpio[m_mySck].Write(GpioPinValue.High);
-                Thread.Sleep(1);
-                Pi.Gpio[m_mySck].Write(GpioPinValue.Low);
-            }
-
-            Pi.Gpio[m_myCs].Write(GpioPinValue.High);
-
-            if (errorTc)
-                return -1.0f;
-
-            return m_myMode switch
-            {
-                TemperatureMode.Raw => value,
-                TemperatureMode.Celsius => value * 0.25f,
-                TemperatureMode.Fahrenheit => value * 0.25f * 0.9f / 5.0f + 32.0f,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
 
         public float TemperatureInCelsius
         {
