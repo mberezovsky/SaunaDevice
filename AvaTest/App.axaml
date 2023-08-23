@@ -8,11 +8,12 @@
 
     <Application.Styles>
         <!-- <FluentTheme Mode="Light"/> -->
-        <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseLight.xaml"/>
+        <!-- <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/> -->
+        <!-- <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseLight.xaml"/> -->
         
         <!-- Add the line below to get OxyPlot UI theme applied. -->
-        <StyleInclude Source="resm:OxyPlot.Avalonia.Themes.Default.xaml?assembly=OxyPlot.Avalonia"/>
+        <!-- <StyleInclude Source="resm:OxyPlot.Avalonia.Themes.Default.xaml?assembly=OxyPlot.Avalonia"/> -->
 
+        <FluentTheme/>
     </Application.Styles>
 </Application>

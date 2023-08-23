@@ -8,6 +8,7 @@
         x:Class="AvaTest.Views.MainWindow"
         Width="1280" Height="600"
         Icon="/Assets/avalonia-logo.ico"
+        WindowState="Maximized"
         Title="AvaTest">
 
     <Design.DataContext>

@@ -9,8 +9,11 @@
         <GenerateProgramFile>false</GenerateProgramFile>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
+        <AvaloniaXaml Remove="Models\**" />
+        <Compile Remove="Models\**" />
+        <EmbeddedResource Remove="Models\**" />
+        <None Remove="Models\**" />
         <None Remove=".gitignore" />
         <None Update="runtimeconfig.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
