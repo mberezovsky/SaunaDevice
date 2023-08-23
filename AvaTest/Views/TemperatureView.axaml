@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:AvaTest.ViewModels"
              xmlns:oxy="http://oxyplot.org/avalonia"
+             xmlns:liveChartsCore="clr-namespace:LiveChartsCore;assembly=LiveChartsCore"
+             xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="AvaTest.Views.TemperatureView">
     <Design.DataContext>
@@ -11,12 +13,13 @@
     </Design.DataContext>
 
     <Grid ColumnDefinitions="3*,*">
-        <oxy:Plot Grid.Column="0" Title="Температура в парилке" x:Name="Plotter">
-            <oxy:Plot.Series>
-                <oxy:LineSeries Title="Температура" Items="{Binding Measures}"
-                                DataFieldX="DeltaTime" DataFieldY="Data" StrokeThickness="2" Color="Blue"/>
-            </oxy:Plot.Series>
-        </oxy:Plot>
+        <avalonia:CartesianChart Series = "{Binding Series}"/>
+        <!-- <oxy:Plot Grid.Column="0" Title="Температура в парилке" x:Name="Plotter"> -->
+        <!--     <oxy:Plot.Series> -->
+        <!--         <oxy:LineSeries Title="Температура" Items="{Binding Measures}" -->
+        <!--                         DataFieldX="DeltaTime" DataFieldY="Data" StrokeThickness="2" Color="Blue"/> -->
+        <!--     </oxy:Plot.Series> -->
+        <!-- </oxy:Plot> -->
         <!--     <Path Stroke="Black" StrokeThickness="1" -->
         <!--           Canvas.Left="250" Canvas.Top="250"  -->
         <!--           Data="{Binding  FigureGeometry}" -->

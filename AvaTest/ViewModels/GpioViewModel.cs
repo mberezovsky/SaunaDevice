@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Threading;
 using AvaTest.Services;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
 // using Unosquare.RaspberryIO;
 // using Unosquare.RaspberryIO.Abstractions;
@@ -91,7 +93,9 @@ namespace AvaTest.ViewModels
             if (m_isFakeTemperature)
             {
                 Console.WriteLine("Fake!");
-                temp = 25.0f + m_rnd.Next(-5, 5);
+                InternalTemperature = (int)(25.0f + m_rnd.Next(-5, 5));
+                Humidity = 0;
+                TemperatureInCelsius = (int)(90.0f + m_rnd.Next(-20, 20));
             }
             else
             {
@@ -128,14 +132,18 @@ namespace AvaTest.ViewModels
 
         private void ShiftTemps(float temp)
         {
+            LineSeries<float> temperatureSeries = new LineSeries<float>();
             for (int i = 0; i < m_temperatureMeasures.Count - 1; i++)
             {
                 m_temperatureMeasures[i].Data = m_temperatureMeasures[i + 1].Data;
             }
 
             m_temperatureMeasures.Last().Data = temp;
+            temperatureSeries.Values = m_temperatureMeasures.Select(item => item.Data).ToArray();
             var tempState = AnalyzeDelta(m_temperatureMeasures);
             TemperatureState = tempState;
+            m_series.Clear();
+            m_series.Add(temperatureSeries);
         }
 
         private ETemperatureStates AnalyzeDelta(ObservableCollection<MeasureData> temperatureMeasures)
@@ -171,6 +179,7 @@ namespace AvaTest.ViewModels
         private int m_temperatureStepsCount;
 
         private readonly ObservableCollection<MeasureData> m_temperatureMeasures = new ObservableCollection<MeasureData>();
+        private readonly ObservableCollection<ISeries> m_series = new ObservableCollection<ISeries>();
 
         private DateTime m_minTime;
 
@@ -271,6 +280,8 @@ namespace AvaTest.ViewModels
 
         public ObservableCollection<MeasureData> Measures => m_temperatureMeasures;
 
+        public ObservableCollection<ISeries> Series => m_series;
+        
         public enum ETemperatureStates
         {
             Heating,
@@ -326,6 +337,7 @@ namespace AvaTest.ViewModels
             get => m_humidity;
             set => this.RaiseAndSetIfChanged(ref m_humidity, value);
         }
+        
     }
 
     public class MeasureData
