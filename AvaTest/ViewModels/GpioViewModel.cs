@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Threading;
@@ -23,6 +24,13 @@ namespace AvaTest.ViewModels
             Fahrenheit
         }
 
+        enum EShowMode
+        {
+            ByThreeSeconds,
+            ByThirtySeconds,
+            ByThreeMinutes
+        }
+
         private readonly bool m_isFakeTemperature;
 
         public GpioViewModel()
@@ -30,59 +38,23 @@ namespace AvaTest.ViewModels
             var os = Environment.OSVersion;
             m_isFakeTemperature = os.Version.Major == 21;
 
-            MeasureStepsCount = 100;
+            if (Environment.GetEnvironmentVariable("FAKE_TEMPERATURE") == "true")
+            {
+                m_isFakeTemperature = true;
+            }
 
-            // if (!m_isFakeTemperature)
-            // {
-            //     // Pi.Init<BootstrapWiringPi>();
-            //     // SetPins(11, 9, 8, TemperatureMode.Celsius);
-            // }
+            MeasureStepsCount = 100;
 
             MeasureStepsCount = 100;
             m_dispatcherTimer = new DispatcherTimer(TimeSpan.FromSeconds(3), DispatcherPriority.Normal, TimerTick);
             m_dispatcherTimer.Start();
+            var lineSeries = new LineSeries<float?>();
+            m_series.Add(lineSeries);
+            lineSeries.EnableNullSplitting = true;
+            lineSeries.Values = new ObservableCollection<float?>();
 
         }
 
-        // public Collection<Item> Items
-        // {
-        //     get => m_items;
-        //     set => this.RaiseAndSetIfChanged(ref m_items, value);
-        // }
-
-        // private static string GeneratePathGeometry(Collection<float> pointsData)
-        // {
-        //     int figureWidth = 400;
-        //     int figureHeight = 300;
-        //     int xOffset = -200;
-        //     int yOffset = -200;
-        //     float lowestTemperature = pointsData.Min();
-        //     float highestTemperature = pointsData.Max();
-        //     int stepsCount = pointsData.Count;
-        //
-        //     float xScale = (float) figureWidth / stepsCount;
-        //     float yScale = (highestTemperature - lowestTemperature) / figureHeight;
-        //
-        //     var sb = new StringBuilder();
-        //     bool isFirstData = true;
-        //     for (int i = 0; i < pointsData.Count; i++)
-        //     {
-        //         if (pointsData[i] <= 0)
-        //             continue;
-        //
-        //         var xValue = (int) (i * xScale) + xOffset;
-        //         var yValue = figureHeight / 2 - ((int) ((pointsData[i] - lowestTemperature) / yScale) + yOffset);
-        //         if (isFirstData)
-        //         {
-        //             isFirstData = false;
-        //             sb.Append($"M {xValue},{yValue}");
-        //         }
-        //         else
-        //             sb.Append($" L {xValue},{yValue}");
-        //     }
-        //
-        //     return sb.ToString();
-        // }
 
         private readonly Random m_rnd = new Random();
 
@@ -124,26 +96,42 @@ namespace AvaTest.ViewModels
 
             // TemperatureInCelsius = temp;
             ShiftTemps(TemperatureInCelsius);
-            MinTime = m_temperatureMeasures.Min(item => item.Time);
-            MaxTime = m_temperatureMeasures.Max(item => item.Time);
+            MinTime = m_temperatureMeasures.First().Time;//.Min(item => item.Time);
+            MaxTime = m_temperatureMeasures.Last().Time; //Max(item => item.Time);
 
             // FigurePath = GeneratePathGeometry(m_temperatureMeasures);
         }
 
+        float m_thirtySecondsAccumulator = 0.0f;
+        float m_threeMinutesAccumulator = 0.0f;
+
+        DateTime m_thirtySecondsTimeStamp;
+        DateTime m_threeMinutesTimeStamp;
+
         private void ShiftTemps(float temp)
         {
-            LineSeries<float> temperatureSeries = new LineSeries<float>();
+            LineSeries<float?> temperatureSeries = (LineSeries<float?>)m_series[0];//new LineSeries<float>();
+            ObservableCollection<float?> dataValues = (ObservableCollection<float?>)temperatureSeries.Values;
             for (int i = 0; i < m_temperatureMeasures.Count - 1; i++)
             {
                 m_temperatureMeasures[i].Data = m_temperatureMeasures[i + 1].Data;
+                float data = m_temperatureMeasures[i].Data;
+                if (dataValues.Count > i)
+                    dataValues[i] = data < 0.01? null : data;
+                else 
+                    dataValues.Add(data < 0.01? null : data);
             }
 
             m_temperatureMeasures.Last().Data = temp;
-            temperatureSeries.Values = m_temperatureMeasures.Select(item => item.Data).ToArray();
+            if (dataValues.Count == m_temperatureMeasures.Count)
+                dataValues[m_temperatureMeasures.Count - 1] = temp < 0.01? null: temp;
+            else
+                dataValues.Add(temp < 0.01? null : temp);
+            // temperatureSeries.Values = m_temperatureMeasures.Select(item => item.Data).ToArray();
             var tempState = AnalyzeDelta(m_temperatureMeasures);
             TemperatureState = tempState;
-            m_series.Clear();
-            m_series.Add(temperatureSeries);
+            // m_series.Clear();
+            // m_series.Add(temperatureSeries);
         }
 
         private ETemperatureStates AnalyzeDelta(ObservableCollection<MeasureData> temperatureMeasures)
@@ -174,29 +162,16 @@ namespace AvaTest.ViewModels
         private TemperatureMode m_myMode;
         private readonly DispatcherTimer m_dispatcherTimer;
         private float m_temperatureInCelsius;
-        // private string m_figurePath;
-        // private Geometry m_figureGeometry;
         private int m_temperatureStepsCount;
 
-        private readonly ObservableCollection<MeasureData> m_temperatureMeasures = new ObservableCollection<MeasureData>();
-        private readonly ObservableCollection<ISeries> m_series = new ObservableCollection<ISeries>();
+        private readonly ObservableCollection<MeasureData> m_temperatureMeasures = new();
+//        private readonly List<float> m_thirtySecondesMeasures = new List<float>();
+//        private readonly List<>
+        private readonly ObservableCollection<ISeries> m_series = new ObservableCollection<ISeries>() ;
 
         private DateTime m_minTime;
 
         private DateTime m_maxTime;
-        // private Collection<Item> m_items;
-
-        // private void SetPins(int sck, int so, int cs, TemperatureMode mode)
-        // {
-        //     m_mySck = sck;
-        //     m_mySo = so;
-        //     m_myCs = cs;
-        //     m_myMode = mode;
-        //
-        //     Pi.Gpio[m_mySck].PinMode = GpioPinDriveMode.Output;
-        //     Pi.Gpio[m_myCs].PinMode = GpioPinDriveMode.Output;
-        //     Pi.Gpio[m_mySo].PinMode = GpioPinDriveMode.Input;
-        // }
 
 
         public float TemperatureInCelsius
@@ -204,29 +179,6 @@ namespace AvaTest.ViewModels
             get => m_temperatureInCelsius;
             set => this.RaiseAndSetIfChanged(ref m_temperatureInCelsius, value);
         }
-
-        // public string FigurePath
-        // {
-        //     get => m_figurePath;
-        //     set
-        //     {
-        //         this.RaiseAndSetIfChanged(ref m_figurePath, value);
-        //         try
-        //         {
-        //             var geometry = Geometry.Parse(m_figurePath);
-        //             FigureGeometry = geometry;
-        //         }
-        //         catch (Exception e)
-        //         {
-        //         }
-        //     }
-        // }
-
-        // public Geometry FigureGeometry
-        // {
-        //     get => m_figureGeometry;
-        //     set => this.RaiseAndSetIfChanged(ref m_figureGeometry, value);
-        // }
 
         public int MedianAperture
         {
@@ -338,6 +290,45 @@ namespace AvaTest.ViewModels
             set => this.RaiseAndSetIfChanged(ref m_humidity, value);
         }
         
+    }
+
+    public class DataAccumulator
+    {
+        private readonly TimeSpan m_accumulatorSpan;
+        private float m_temperatureAccumulator;
+        private int m_counter = 0;
+        
+        private DateTime m_lastCheckPoint = DateTime.MinValue;
+
+        public DataAccumulator(TimeSpan accumulatorSpan)
+        {
+            m_accumulatorSpan = accumulatorSpan;
+        }
+
+        public MeasureData? RegisterData(float temperature)
+        {
+            if (m_lastCheckPoint == DateTime.MinValue)
+            {
+                m_lastCheckPoint = DateTime.Now;
+                m_temperatureAccumulator = 0f;
+                m_counter = 0;
+            }
+            if (DateTime.Now > m_lastCheckPoint+m_accumulatorSpan)
+            {
+                var res = new MeasureData() {
+                    Data = m_temperatureAccumulator,
+                    Time = m_lastCheckPoint
+                };
+                m_temperatureAccumulator = temperature;
+                m_lastCheckPoint = DateTime.Now;
+                m_counter = 1;
+                return res;
+            }
+
+            m_temperatureAccumulator += (m_temperatureAccumulator*m_counter+temperature)/(m_counter+1);
+            m_counter++;
+            return null;
+        }
     }
 
     public class MeasureData

@@ -13,18 +13,7 @@
     </Design.DataContext>
 
     <Grid ColumnDefinitions="3*,*">
-        <avalonia:CartesianChart Series = "{Binding Series}"/>
-        <!-- <oxy:Plot Grid.Column="0" Title="Температура в парилке" x:Name="Plotter"> -->
-        <!--     <oxy:Plot.Series> -->
-        <!--         <oxy:LineSeries Title="Температура" Items="{Binding Measures}" -->
-        <!--                         DataFieldX="DeltaTime" DataFieldY="Data" StrokeThickness="2" Color="Blue"/> -->
-        <!--     </oxy:Plot.Series> -->
-        <!-- </oxy:Plot> -->
-        <!--     <Path Stroke="Black" StrokeThickness="1" -->
-        <!--           Canvas.Left="250" Canvas.Top="250"  -->
-        <!--           Data="{Binding  FigureGeometry}" -->
-        <!--     /> -->
-        <!-- </Canvas> -->
+        <avalonia:CartesianChart Series = "{Binding Series}" />
         <Grid Grid.Column="1" RowDefinitions="Auto, *, *, Auto">
             <Grid.Styles>
                 <Style Selector="TextBlock">
@@ -35,7 +24,7 @@
             </Grid.Styles>
             <TextBlock Text="Сейчас:"/>
             
-            <Grid Grid.Row="1" RowDefinitions="*,*,*" ColumnDefinitions="Auto, *, Auto, Auto">
+            <Grid Grid.Row="1" RowDefinitions="5*,*,*" ColumnDefinitions="Auto, *, Auto, Auto">
                 <Grid.Styles>
                     <Style Selector="TextBlock.leftAligned" >
                         <Setter Property="TextAlignment" Value="Left"></Setter>
@@ -49,7 +38,9 @@
                 <TextBlock Text="Парилка"/>
                 <Viewbox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding TemperatureInCelsius}" Classes="leftAligned Bolded"/>
+                        <TextBlock Text="{Binding TemperatureInCelsius}"
+								   Classes="leftAligned Bolded"
+								   />
                         <TextBlock Text="℃" Classes="leftAligned"/>
                     </StackPanel>
                 </Viewbox>
@@ -81,19 +72,6 @@
                     </StackPanel>
                 </Viewbox>
             </Grid>
-            <!-- <StackPanel Grid.Row="1" Orientation="Horizontal"> -->
-            <!--     <TextBlock Text="Парилка"/> -->
-            <!--     <TextBlock Text="{Binding TemperatureInCelsius}" /> -->
-            <!--     <TextBlock Text="℃"/> -->
-            <!-- </StackPanel> -->
-            <!-- <StackPanel Grid.Row="2" Orientation="Horizontal"> -->
-            <!--     <TextBlock Text="Отдых:"/> -->
-            <!--     <TextBlock Text="{Binding TemperatureInCelsius}" /> -->
-            <!--     <TextBlock Text="℃"/> -->
-            <!-- </StackPanel> -->
-            <!-- <TextBox Grid.Row="1" Text="{Binding FigurePath}" -->
-            <!--          AcceptsReturn="True" TextWrapping="Wrap"/> -->
-            <!-- -->
         </Grid>
     </Grid>
 </UserControl>
