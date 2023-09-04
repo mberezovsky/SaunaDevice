@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Threading;
@@ -7,9 +6,6 @@ using AvaTest.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
-// using Unosquare.RaspberryIO;
-// using Unosquare.RaspberryIO.Abstractions;
-// using Unosquare.WiringPi;
 
 namespace AvaTest.ViewModels
 {
@@ -36,12 +32,7 @@ namespace AvaTest.ViewModels
         public GpioViewModel()
         {
             var os = Environment.OSVersion;
-            m_isFakeTemperature = os.Version.Major == 21;
-
-            if (Environment.GetEnvironmentVariable("FAKE_TEMPERATURE") == "true")
-            {
-                m_isFakeTemperature = true;
-            }
+            m_isFakeTemperature = os.Version.Major == 21 || Environment.GetEnvironmentVariable("FAKE_TEMPERATURE") == "true";
 
             MeasureStepsCount = 100;
 
