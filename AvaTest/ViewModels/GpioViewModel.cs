@@ -1,12 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Avalonia.Threading;
 using AvaTest.Services;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using ReactiveUI;
 
+[assembly:InternalsVisibleTo("AvaUnitTests")]
 namespace AvaTest.ViewModels
 {
 
@@ -283,7 +285,7 @@ namespace AvaTest.ViewModels
         
     }
 
-    public class DataAccumulator
+    internal class DataAccumulator
     {
         private readonly TimeSpan m_accumulatorSpan;
         private float m_temperatureAccumulator;
@@ -298,13 +300,18 @@ namespace AvaTest.ViewModels
 
         public MeasureData? RegisterData(float temperature)
         {
+            return RegisterData(temperature, DateTime.Now);
+        }
+
+        public MeasureData? RegisterData(float temperature, DateTime currentDateTime)
+        {
             if (m_lastCheckPoint == DateTime.MinValue)
             {
                 m_lastCheckPoint = DateTime.Now;
-                m_temperatureAccumulator = 0f;
+                m_temperatureAccumulator = 0;
                 m_counter = 0;
             }
-            if (DateTime.Now > m_lastCheckPoint+m_accumulatorSpan)
+            if (currentDateTime > m_lastCheckPoint+m_accumulatorSpan)
             {
                 var res = new MeasureData() {
                     Data = m_temperatureAccumulator,
@@ -316,7 +323,7 @@ namespace AvaTest.ViewModels
                 return res;
             }
 
-            m_temperatureAccumulator += (m_temperatureAccumulator*m_counter+temperature)/(m_counter+1);
+            m_temperatureAccumulator = (m_temperatureAccumulator*m_counter+temperature)/(m_counter+1);
             m_counter++;
             return null;
         }
