@@ -24,6 +24,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration Release -f net6.0 -r linux-arm64
+      run: dotnet build --no-restore --configuration Release -f net6.0
+    - name: Publish
+      run: dotnet publish -f net6.0 -r linux-arm64
     - name: Test
       run: dotnet test --no-build --verbosity normal
