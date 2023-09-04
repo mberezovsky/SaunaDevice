@@ -30,7 +30,3 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - run: mkdir -p binaries
-    - uses: actions/upload-artifact@v3
-      with:
-        name: 'build_data'
-        path: AvaTest/bin/Debug/netcoreapp3.1/**
