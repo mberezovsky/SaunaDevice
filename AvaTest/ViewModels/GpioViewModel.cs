@@ -307,18 +307,18 @@ namespace AvaTest.ViewModels
         {
             if (m_lastCheckPoint == DateTime.MinValue)
             {
-                m_lastCheckPoint = DateTime.Now;
+                m_lastCheckPoint = currentDateTime;
                 m_temperatureAccumulator = 0;
                 m_counter = 0;
             }
-            if (currentDateTime > m_lastCheckPoint+m_accumulatorSpan)
+            if (currentDateTime >= m_lastCheckPoint+m_accumulatorSpan)
             {
                 var res = new MeasureData() {
                     Data = m_temperatureAccumulator,
                     Time = m_lastCheckPoint
                 };
                 m_temperatureAccumulator = temperature;
-                m_lastCheckPoint = DateTime.Now;
+                m_lastCheckPoint += m_accumulatorSpan;
                 m_counter = 1;
                 return res;
             }
@@ -329,6 +329,27 @@ namespace AvaTest.ViewModels
         }
     }
 
+    internal class DataSeries
+    {
+        private readonly DataAccumulator m_accumulator;
+        private readonly MeasureData?[] m_data;
+        
+        public DataSeries(TimeSpan span, int seriesLength)
+        {
+            m_accumulator = new DataAccumulator(span);
+            m_data = new MeasureData?[seriesLength];
+        }
+
+        public void RegisterData(float data, DateTime currentTimeStamp)
+        {
+            MeasureData? current = m_accumulator.RegisterData(data, currentTimeStamp);
+            if (current != null)
+            {
+                
+            }
+        }
+    }
+    
     public class MeasureData
     {
         public DateTime Time = DateTime.Now;

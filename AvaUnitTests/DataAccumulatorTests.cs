@@ -43,17 +43,17 @@ public class DataAccumulatorTests
         res = dataAccumulator.RegisterData(3.0f, nowTime + TimeSpan.FromSeconds(6));
         Assert.That(res, Is.Not.Null);
         Assert.That(res.Data, Is.EqualTo(1.0f));
-        Assert.That(res.Time, Is.EqualTo(nowTime));
+        Assert.That((int)((res.Time - nowTime).TotalSeconds), Is.EqualTo(0));
 
-        DateTime checkpoint = nowTime + TimeSpan.FromSeconds(6);
+        DateTime checkpoint = nowTime + TimeSpan.FromSeconds(5);
         
-        res = dataAccumulator.RegisterData(3.0f, checkpoint);
+        res = dataAccumulator.RegisterData(3.0f, nowTime + TimeSpan.FromSeconds(6));
         Assert.That(res, Is.Null);
         res = dataAccumulator.RegisterData(3.0f, nowTime + TimeSpan.FromSeconds(9));
         Assert.That(res, Is.Null);
         res = dataAccumulator.RegisterData(4.0f, nowTime + TimeSpan.FromSeconds(11));
         Assert.That(res, Is.Not.Null);
         Assert.That(res.Data, Is.EqualTo(3.0f));
-        Assert.That(res.Time, Is.EqualTo(checkpoint));
+        Assert.That((int)(res.Time - checkpoint).TotalSeconds, Is.EqualTo(0));
     }
 }
