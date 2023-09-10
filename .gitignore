@@ -1,1 +1,11 @@
 /SpiTest/obj/**/*
+/.idea/.idea.AvaTest/.idea
+/.vs
+/AvaTestProject/bin/Release
+/AvaTestProject/obj
+/AvaUnitTests/bin
+/AvaUnitTests/obj/Debug
+/AvaUnitTests/obj/Release
+/AvaUnitTests/obj
+/packages
+/_ReSharper.Caches

@@ -5,14 +5,12 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaTest", "AvaTest\AvaTest.csproj", "{CE5ACF76-BF07-4785-87BE-AB9078F76A9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaTestProject", "AvaTestProject\AvaTestProject.csproj", "{043D851D-1EAF-48D9-BA4B-6178C395D9F4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A6897024-BA4B-49E0-9073-D37130F0A60A}"
 	ProjectSection(SolutionItems) = preProject
 		TODO.txt = TODO.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaUnitTests", "AvaUnitTests\AvaUnitTests.csproj", "{13A1ECE6-2C02-47E1-B60B-8447D25DE682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaUnitTests", "AvaUnitTests\AvaUnitTests.csproj", "{13A1ECE6-2C02-47E1-B60B-8447D25DE682}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,9 +22,6 @@ Global
 		{CE5ACF76-BF07-4785-87BE-AB9078F76A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE5ACF76-BF07-4785-87BE-AB9078F76A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE5ACF76-BF07-4785-87BE-AB9078F76A9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{043D851D-1EAF-48D9-BA4B-6178C395D9F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{043D851D-1EAF-48D9-BA4B-6178C395D9F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{043D851D-1EAF-48D9-BA4B-6178C395D9F4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13A1ECE6-2C02-47E1-B60B-8447D25DE682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{13A1ECE6-2C02-47E1-B60B-8447D25DE682}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13A1ECE6-2C02-47E1-B60B-8447D25DE682}.Release|Any CPU.ActiveCfg = Release|Any CPU
