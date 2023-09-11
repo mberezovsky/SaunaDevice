@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia.Threading;
@@ -329,15 +331,61 @@ namespace AvaTest.ViewModels
         }
     }
 
+    internal class CircularBuffer<T>
+    {
+        private readonly T[] m_buffer;
+        private int m_endIdx;
+
+        private CircularBuffer(int bufferSize)
+        {
+            m_buffer = new T[bufferSize];
+            m_endIdx = 0;
+        }
+
+        public int Count => m_buffer.Length;
+
+        public void Put(T data)
+        {
+            m_buffer[m_endIdx++] = data;
+            if (m_endIdx == m_buffer.Length)
+            {
+                m_endIdx = 0;
+            }
+        }
+
+        public T[] ToArray()
+        {
+            var res = new T[m_buffer.Length];
+            int endIdx = m_endIdx;
+            for (int i = 0; i < m_buffer.Length; i++)
+            {
+                if (endIdx >= m_buffer.Length)
+                    endIdx = 0;
+
+                res[i] = m_buffer[endIdx++];
+            }
+
+            return res;
+        }
+
+       public static CircularBuffer<T> Create(int bufferSize) 
+        {
+            if (bufferSize <= 0) throw new ArgumentException(
+                string.Format("Circular buffer size must be more than 0 size, but passed value is {0}", bufferSize));
+
+            return new CircularBuffer<T>(bufferSize);
+        }
+    }
+
     internal class DataSeries
     {
         private readonly DataAccumulator m_accumulator;
-        private readonly MeasureData?[] m_data;
+        private readonly CircularBuffer<MeasureData> m_buffer;
         
         public DataSeries(TimeSpan span, int seriesLength)
         {
             m_accumulator = new DataAccumulator(span);
-            m_data = new MeasureData?[seriesLength];
+            m_buffer = CircularBuffer<MeasureData>.Create(seriesLength);
         }
 
         public void RegisterData(float data, DateTime currentTimeStamp)
@@ -345,8 +393,13 @@ namespace AvaTest.ViewModels
             MeasureData? current = m_accumulator.RegisterData(data, currentTimeStamp);
             if (current != null)
             {
-                
+                m_buffer.Put(current);
             }
+        }
+
+        public MeasureData[] ToArray()
+        {
+            return m_buffer.ToArray();
         }
     }
     
