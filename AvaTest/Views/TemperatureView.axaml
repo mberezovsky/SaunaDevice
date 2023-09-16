@@ -12,18 +12,36 @@
         <viewModels:GpioViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="3*,*">
-        <avalonia:CartesianChart Series = "{Binding Series}" />
-        <Grid Grid.Column="1" RowDefinitions="Auto, *, *, Auto">
+    <Grid ColumnDefinitions="*, 3*,*">
+        <Grid RowDefinitions="Auto, *, Auto">
+            <Grid.Styles>
+                <Style Selector="TextBlock">
+                    <Setter Property="Margin" Value="5"/>
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                    <Setter Property="FontSize" Value="32"/>
+                </Style>
+            </Grid.Styles>
+            <TextBlock Grid.Row="0" Text="{Binding MaxTemperature}" />
+            <TextBlock Grid.Row="2" Text="{Binding MinTemperature}" />
+        </Grid>
+        <avalonia:CartesianChart Grid.Column="1" Series = "{Binding Series}" />
+        <Grid Grid.Column="2" RowDefinitions="Auto, *, Auto, Auto, Auto">
             <Grid.Styles>
                 <Style Selector="TextBlock">
                     <!-- <Setter Property="FontSize" Value="32"/> -->
                     <Setter Property="Margin" Value="5"/>
                     <Setter Property="VerticalAlignment" Value="Center"></Setter>
                 </Style>
+                <Style Selector="Button">
+                    <Setter Property="MinWidth" Value="100"/>
+                    <Setter Property="MinHeight" Value="50"/>
+                    <Setter Property="Margin" Value="4"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
             </Grid.Styles>
             <TextBlock Text="Сейчас:"/>
-            
             <Grid Grid.Row="1" RowDefinitions="5*,*,*" ColumnDefinitions="Auto, *, Auto, Auto">
                 <Grid.Styles>
                     <Style Selector="TextBlock.leftAligned" >
@@ -64,14 +82,10 @@
                         <TextBlock Text="℃" Classes="leftAligned"/>
                     </StackPanel>
                 </Viewbox>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Влажность:"/>
-                <Viewbox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Grid.ColumnSpan="2">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Humidity}" Classes="leftAligned Bolded" />
-                        <TextBlock Text="мм рт ст" Classes="leftAligned"/>
-                    </StackPanel>
-                </Viewbox>
             </Grid>
+            <Button Grid.Row="2" Command="{Binding On3SecondsSelected}"> 3 сек</Button>
+            <Button Grid.Row="3" Command="{Binding On30SecondsSelected}"> 30 сек</Button>
+            <Button Grid.Row="4" Command="{Binding On3MinutesSelected}"> 3 мин</Button>
         </Grid>
     </Grid>
 </UserControl>

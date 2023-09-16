@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia.Threading;
@@ -17,6 +16,9 @@ namespace AvaTest.ViewModels
     public class GpioViewModel : ViewModelBase
     {
         private readonly Dht11Service m_dht11Service = new Dht11Service();
+        private readonly DataSeries m_threeSecondsSeries = new DataSeries(TimeSpan.FromSeconds(3), 100);
+        private readonly DataSeries m_thirtySecondsSeries = new DataSeries(TimeSpan.FromSeconds(30), 100);
+        private readonly DataSeries m_threeMinutesSeries = new DataSeries(TimeSpan.FromMinutes(3), 100);
         private enum TemperatureMode
         {
             Raw,
@@ -30,6 +32,8 @@ namespace AvaTest.ViewModels
             ByThirtySeconds,
             ByThreeMinutes
         }
+
+        private EShowMode m_showMode = EShowMode.ByThreeSeconds;
 
         private readonly bool m_isFakeTemperature;
 
@@ -97,36 +101,76 @@ namespace AvaTest.ViewModels
             // FigurePath = GeneratePathGeometry(m_temperatureMeasures);
         }
 
-        float m_thirtySecondsAccumulator = 0.0f;
-        float m_threeMinutesAccumulator = 0.0f;
+        DataSeries GetCurrentDataSeries()
+        {
+            switch (m_showMode)
+            {
+                case EShowMode.ByThreeSeconds : return m_threeSecondsSeries;
+                case EShowMode.ByThirtySeconds : return m_thirtySecondsSeries;
+                default: return m_threeMinutesSeries;
+            }
+        }
 
-        DateTime m_thirtySecondsTimeStamp;
-        DateTime m_threeMinutesTimeStamp;
+        private void UpdateTemps(float temp)
+        {
+            DateTime now = DateTime.Now;
+            m_threeSecondsSeries.RegisterData(temp, now);
+            m_thirtySecondsSeries.RegisterData(temp, now);
+            m_threeMinutesSeries.RegisterData(temp, now);
+
+            var temperatureSeries = (LineSeries<float?>)m_series[0];//new LineSeries<float>();
+            if (temperatureSeries.Values == null)
+                return;
+
+            var dataValues = (ObservableCollection<float?>)temperatureSeries.Values;
+            var dataSeries = GetCurrentDataSeries();
+
+            var measureData = dataSeries.ToArray();
+
+            if (measureData.Count > dataValues.Count)
+                dataValues.Clear();
+
+            float minTemp = float.MaxValue;
+            float maxTemp = float.MinValue;
+
+            for (int i = 0; i < measureData.Count; i++)
+            {
+                if (dataValues.Count <= i)
+                {
+                    dataValues.Add(measureData[i] == null ? null : measureData[i].Data);
+                }
+                else
+                    dataValues[i] = measureData[i] == null? null : measureData[i].Data;
+
+                if (measureData[i] != null)
+                {
+                    if (measureData[i].Data > maxTemp) maxTemp = measureData[i].Data;
+                    if (measureData[i].Data < minTemp) minTemp = measureData[i].Data;
+                }
+            }
+
+            MinTemperature = minTemp;
+            MaxTemperature = maxTemp;
+        }
+
+        public void On3SecondsSelected()
+        {
+            this.m_showMode = EShowMode.ByThreeSeconds;
+        }
+
+        public void On30SecondsSelected()
+        {
+            m_showMode = EShowMode.ByThirtySeconds;
+        }
+
+        public void On3MinutesSelected()
+        {
+            m_showMode = EShowMode.ByThreeMinutes;
+        }
 
         private void ShiftTemps(float temp)
         {
-            LineSeries<float?> temperatureSeries = (LineSeries<float?>)m_series[0];//new LineSeries<float>();
-            ObservableCollection<float?> dataValues = (ObservableCollection<float?>)temperatureSeries.Values;
-            for (int i = 0; i < m_temperatureMeasures.Count - 1; i++)
-            {
-                m_temperatureMeasures[i].Data = m_temperatureMeasures[i + 1].Data;
-                float data = m_temperatureMeasures[i].Data;
-                if (dataValues.Count > i)
-                    dataValues[i] = data < 0.01? null : data;
-                else 
-                    dataValues.Add(data < 0.01? null : data);
-            }
-
-            m_temperatureMeasures.Last().Data = temp;
-            if (dataValues.Count == m_temperatureMeasures.Count)
-                dataValues[m_temperatureMeasures.Count - 1] = temp < 0.01? null: temp;
-            else
-                dataValues.Add(temp < 0.01? null : temp);
-            // temperatureSeries.Values = m_temperatureMeasures.Select(item => item.Data).ToArray();
-            var tempState = AnalyzeDelta(m_temperatureMeasures);
-            TemperatureState = tempState;
-            // m_series.Clear();
-            // m_series.Add(temperatureSeries);
+            UpdateTemps(temp);
         }
 
         private ETemperatureStates AnalyzeDelta(ObservableCollection<MeasureData> temperatureMeasures)
@@ -167,6 +211,21 @@ namespace AvaTest.ViewModels
         private DateTime m_minTime;
 
         private DateTime m_maxTime;
+
+        private float m_minTemperature;
+        private float m_maxTemperature;
+
+        public float MinTemperature
+        {
+            get => m_minTemperature;
+            set => this.RaiseAndSetIfChanged(ref m_minTemperature, value);
+        }
+
+        public float MaxTemperature
+        {
+            get => m_maxTemperature;
+            set => this.RaiseAndSetIfChanged(ref m_maxTemperature, value);
+        }
 
 
         public float TemperatureInCelsius
@@ -353,19 +412,37 @@ namespace AvaTest.ViewModels
             }
         }
 
-        public T[] ToArray()
+        public List<T> ToArray()
         {
-            var res = new T[m_buffer.Length];
+            var res = new List<T>();
+            int endIdx = m_endIdx;
+            foreach (var t in m_buffer)
+            {
+                if (endIdx >= m_buffer.Length)
+                    endIdx = 0;
+
+                res.Add(m_buffer[endIdx++]);
+            }
+
+            return res;
+        }
+
+        public void ToArray(List<T> buffer)
+        {
+            if (buffer.Count > m_buffer.Length) 
+                buffer.Clear();
+
             int endIdx = m_endIdx;
             for (int i = 0; i < m_buffer.Length; i++)
             {
                 if (endIdx >= m_buffer.Length)
                     endIdx = 0;
 
-                res[i] = m_buffer[endIdx++];
+                if (i >= buffer.Count)
+                    buffer.Add(m_buffer[endIdx++]);
+                else
+                    buffer[i] = m_buffer[endIdx++];
             }
-
-            return res;
         }
 
        public static CircularBuffer<T> Create(int bufferSize) 
@@ -397,9 +474,14 @@ namespace AvaTest.ViewModels
             }
         }
 
-        public MeasureData[] ToArray()
+        public List<MeasureData> ToArray()
         {
             return m_buffer.ToArray();
+        }
+
+        public void ToArray(List<MeasureData> buffer)
+        {
+            m_buffer.ToArray(buffer);
         }
     }
     

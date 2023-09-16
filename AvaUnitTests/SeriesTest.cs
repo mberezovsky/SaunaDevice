@@ -9,8 +9,8 @@ internal class SeriesTest
     public void SimpleSeriesTest()
     {
         DataSeries series = new DataSeries(TimeSpan.FromSeconds(0), 5);
-        MeasureData?[] res = series.ToArray();
-        Assert.That(res.Length, Is.EqualTo(5));
+        List<MeasureData> res = series.ToArray();
+        Assert.That(res.Count, Is.EqualTo(5));
         foreach (var measureData in res)
         {
             Assert.That(measureData, Is.Null);
@@ -51,7 +51,8 @@ internal class SeriesTest
         series.RegisterData(4, startTime+TimeSpan.FromSeconds(4));
         series.RegisterData(5, startTime+TimeSpan.FromSeconds(5));
 
-        MeasureData?[] res = series.ToArray();
+        List<MeasureData> res = new List<MeasureData>();
+        series.ToArray(res);
 
         Assert.That(res[3].Data, Is.EqualTo(1.0f));
         Assert.That(res[2], Is.Null);
@@ -61,7 +62,7 @@ internal class SeriesTest
         series.RegisterData(6, startTime+TimeSpan.FromSeconds(6));
         series.RegisterData(7, startTime+TimeSpan.FromSeconds(7));
         series.RegisterData(8, startTime+TimeSpan.FromSeconds(8));
-        res = series.ToArray();
+        series.ToArray(res);
         Assert.That(res[3].Data, Is.EqualTo(4.0f));
         Assert.That(res[2].Data, Is.EqualTo(1.0f));
         Assert.That(res[1], Is.Null);
@@ -70,7 +71,7 @@ internal class SeriesTest
         series.RegisterData(9, startTime+TimeSpan.FromSeconds(9));
         series.RegisterData(10, startTime+TimeSpan.FromSeconds(10));
         series.RegisterData(11, startTime+TimeSpan.FromSeconds(11));
-        res = series.ToArray();
+        series.ToArray(res);
         Assert.That(res[3].Data, Is.EqualTo(7.0f));
         Assert.That(res[2].Data, Is.EqualTo(4.0f));
         Assert.That(res[1].Data, Is.EqualTo(1.0f));
